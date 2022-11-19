@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no">
+  <title>潮遇App下载</title>
+  <script src="https://cdn.jsdelivr.net/npm/vue@3.2.45/dist/vue.global.min.js"></script>
+  <script>
+    ;(function(win, doc) {
+        'use strict';
+        var options = { width: 750, dpr: win.devicePixelRatio };
+        var html = doc.documentElement,
+            width = html.getAttribute('data-width') || options.width,
+            dpr = html.getAttribute('data-dpr') || options.dpr,
+            viewPort = doc.querySelector('meta[name="viewport"]'),
+            rotate = win.onorientationchange ? 'orientationchange' : 'resize';
+
+        // 设置html fontSize
+        function setSize() {
+            var winWidth = win.innerWidth || html.clientWidth;
+            html.style.fontSize = 100 * winWidth / width + 'px';
+        };
+
+        // 设置 initial-scale
+        function setScale() {
+            setSize();
+            var viewContent = viewPort.getAttribute('content');
+            var reg = /initial-scale=(\d(.\d+)?)/i;
+            var matchRes = viewContent.match(reg);
+            var scale = 1 / parseInt(dpr);
+            if (matchRes && matchRes[1] == scale) {
+                return;
+            }
+            var newContent = viewContent.replace(reg, function(a, b) {
+                return a.replace(/\d(.\d+)?/i, scale);
+            });
+            viewPort.setAttribute('content', newContent);
+        };
+
+        win.addEventListener(rotate, setSize);
+        window.requestAnimationFrame = window.requestAnimationFrame || window.webkitRequestAnimationFrame;
+        requestAnimationFrame(setScale);
+    }(window, document));
+  </script>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+    }
+    .wrap{
+      width: 100%;
+      height: 100%;
+      font-size: .3rem;
+      background-image: url(./img/bg.png);
+      background-size: 100% 100%;
+      background-position: center;
+      background-repeat: no-repeat;
+      position: absolute;
+      color: #fff;
+    }
+    .img-wrap {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 1.33333rem;
+    }
+    .img {
+      display: block;
+      width: 150px;
+      height: 44px;
+    }
+    .left-img {
+      margin-right: 20px;
+    }
+    .mask {
+      position: absolute;
+      top: 0;
+      height: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+    }
+    .arrow-wrap{
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      align-items: flex-end;
+      margin-top: 20px;
+      margin-right: 20px;
+    }
+    .arrow-img {
+      display: block;
+      width: 200px;
+      height: 200px;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div id="app" class="wrap">
+    <div class="img-wrap">
+      <img @click="downloadAndroid" src="./img/android.png" class="img left-img" alt="">
+      <img @click="downloadIos" src="./img/ios.png" class="img" alt="">
+    </div>
+    <div v-if="mask" @click="hideMask" class="mask">
+      <div class="arrow-wrap">
+        <img src="./img/arrow.png" class="arrow-img" alt="">
+        <div>请点击【···】在默认浏览器中打开链接</div>
+      </div>
+    </div>
+  </div>
+    <script>
+      const { createApp, reactive, ref, isReactive } = Vue
+      const app = createApp({
+        setup() {
+          let mask = ref(false) // 遮罩
+          let isApple = ref(false)
+          // 下载安卓
+          function downloadAndroid() {
+            if(isWeixinBrowser()) {
+              mask.value = true
+              return
+            }
+            console.log('android');
+            window.location.href = 'https://beanbookopen.oss-cn-shenzhen.aliyuncs.com/chaoyu_andriod.apk'
+          }
+          // 下载ios
+          function downloadIos() {
+            if(isWeixinBrowser()) {
+              mask.value = true
+              return
+            }
+            console.log('ios');
+            window.location.href = 'https://apps.apple.com/cn/app/itunes-u/id6444553122'
+          }
+          // 隐藏arrow
+          function hideMask() {
+            mask.value = !mask.value
+          }
+          // 是否是微信环境
+          function isWeixinBrowser() {
+            //获取user-agaent标识头
+            var ua = window.navigator.userAgent.toLowerCase();
+            //判断ua和微信浏览器的标识头是否匹配
+            if (ua.match(/micromessenger/i) == 'micromessenger') {
+                  return true;
+            } else {
+                  return false;
+            }
+          }
+          function appDown() {
+            let u = navigator.userAgent;
+            const isiOS = !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/);
+            const isAndroid = u.indexOf('Android') > -1 || u.indexOf('Adr') > -1; //android终端
+            if(isiOS){
+                isApple.value = true
+            }else if(isAndroid){
+                isApple.value = false
+            }
+          }
+          appDown()
+          return {
+            mask,
+            downloadAndroid,
+            downloadIos,
+            hideMask
+          }
+        }
+      })
+      app.mount('#app')
+    </script>
+</body>
+
+</html>
